@@ -1,0 +1,15 @@
+"use server";
+
+import { inngest } from "@/inngest/client";
+import { Realtime, getSubscriptionToken } from "@inngest/realtime";
+
+export type ManualTriggerToken = Realtime.Token<typeof manualTriggerChannel, ["status"]>;
+
+export async function fetchManualTriggerRealtimeToken(): Promise<ManualTriggerToken> {
+    const token = await getSubscriptionToken(inngest, {
+        channel: manualTriggerChannel(),
+        topics: ["status"] as ["status"]
+    });
+
+    return token;
+}

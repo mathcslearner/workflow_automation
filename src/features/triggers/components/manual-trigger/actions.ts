@@ -1,5 +1,6 @@
 "use server";
 
+import { manualTriggerChannel } from "@/inngest/channels/manual-trigger";
 import { inngest } from "@/inngest/client";
 import { Realtime, getSubscriptionToken } from "@inngest/realtime";
 

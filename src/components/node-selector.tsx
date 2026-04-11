@@ -34,6 +34,12 @@ const triggerNodes: NodeTypeOption[] = [
         label: "Stripe Event",
         description: "Runs the flow when a Stripe Event is captured",
         icon: "/logos/stripe.svg"
+    },
+    {
+        type: NodeType.ANTHROPIC,
+        label: "Anthropic",
+        description: "Uses Anthropic to generate test",
+        icon: "/logos/anthropic.svg"
     }
 ]
 

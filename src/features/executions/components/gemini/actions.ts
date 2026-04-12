@@ -9,7 +9,7 @@ export type GeminiToken = Realtime.Token<
     ["status"]
 >;
 
-export async function fetchAnthropicRealtimeToken(): Promise<GeminiToken> {
+export async function fetchGeminiRealtimeToken(): Promise<GeminiToken> {
     const token = await getSubscriptionToken(inngest, {
         channel: geminiChannel(),
         topics: ["status"]  as ["status"]

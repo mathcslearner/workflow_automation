@@ -40,6 +40,12 @@ const triggerNodes: NodeTypeOption[] = [
         label: "Anthropic",
         description: "Uses Anthropic to generate test",
         icon: "/logos/anthropic.svg"
+    },
+    {
+        type: NodeType.GEMINI,
+        label: "Gemini",
+        description: "Uses Google Gemini to generate text",
+        icon: "/logos/gemini.svg"
     }
 ]
 

@@ -21,6 +21,16 @@ export const credentialsRouter = createTRPCRouter({
             });
         }),
     remove: protectedProcedure
+        .input(z.object({id: z.string()}))
+        .mutation(({ctx, input}) => {
+            return prisma.credential.delete({
+                where: {
+                    id: input.id,
+                    userId: ctx.auth.user.id
+                }
+            })
+        }),
+    update: protectedProcedure
         .input(
             z.object({
                 id: z.string(),

@@ -3,7 +3,7 @@
 import { CredentialType } from "@/generated/prisma/enums"
 import { useRouter } from "next/navigation";
 import z from "zod"
-import { useCreateCredential, useUpdateCredential } from "../hooks/use-credentials";
+import { useCreateCredential, useSuspenseCredential, useUpdateCredential } from "../hooks/use-credentials";
 import { useUpgradeModal } from "@/hooks/use-upgrade-modal";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -200,3 +200,8 @@ export const CredentialForm = ({initialData}: CredentialFormProps) => {
     )
 };
 
+export const CredentialView = ({credentialId}: { credentialId: string }) => {
+    const { data: credential } = useSuspenseCredential(credentialId);
+  
+    return <CredentialForm initialData={credential} />
+  };

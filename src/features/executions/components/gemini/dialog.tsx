@@ -9,6 +9,10 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials";
+import { CredentialType } from "@/generated/prisma/enums";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import Image from "next/image";
 
 const formSchema = z.object({
     variableName: z.string().min(1, {message: "Variable name is required"}).regex(
@@ -16,6 +20,7 @@ const formSchema = z.object({
             message: "Variable name must start with a letter or underscore and contain only letters, numbers, and underscores"
         }
     ),
+    credentialId: z.string().min(1, "Credential is required"),
     systemPrompt: z.string().optional(),
     userPrompt: z.string().min(1, "User prompt is required")
 });
@@ -30,10 +35,13 @@ interface Props {
 }
 
 export const GeminiDialog = ({open, onOpenChange, onSubmit, defaultValues = {}}: Props) => {
+    const { data: credentials, isLoading: isLoadingCredentials } = useCredentialsByType(CredentialType.GEMINI);
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             variableName: defaultValues.variableName || "",
+            credentialId: defaultValues.credentialId || "",
             systemPrompt: defaultValues.systemPrompt || "",
             userPrompt: defaultValues.userPrompt || ""
         }
@@ -44,6 +52,7 @@ export const GeminiDialog = ({open, onOpenChange, onSubmit, defaultValues = {}}:
         if (open) {
             form.reset({
                 variableName: defaultValues.variableName || "",
+                credentialId: defaultValues.credentialId || "",
                 systemPrompt: defaultValues.systemPrompt || "",
                 userPrompt: defaultValues.userPrompt || ""
             });
@@ -78,6 +87,30 @@ export const GeminiDialog = ({open, onOpenChange, onSubmit, defaultValues = {}}:
                                     Use this name to reference the result in other nodes:{" "}
                                     {`{{${watchVariableName}.text}}`}
                                 </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        <FormField control={form.control} name="credentialId" render={({field}) => (
+                            <FormItem>
+                                <FormLabel>Gemini Credential</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCredentials || !credentials?.length}>
+                                    <FormControl>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select a credential" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {credentials?.map((credential) => (
+                                            <SelectItem key={credential.id} value={credential.id}>
+                                                <div className="flex items-center gap-2">
+                                                    <Image src="/logos/gemini.svg" alt="Gemini" width={16} height={16} />
+                                                    {credential.name}
+                                                </div>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
                             )}

@@ -4,6 +4,7 @@ import { geminiChannel } from "@/inngest/channels/gemini";
 import { NonRetriableError } from "inngest";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText } from "ai";
+import prisma from "@/lib/db";
 
 Handlebars.registerHelper("json", (context) => {
     const jsonString = JSON.stringify(context, null, 2);
@@ -14,6 +15,7 @@ Handlebars.registerHelper("json", (context) => {
 
 type GeminiData = {
     variableName?: string;
+    credentialId?: string;
     systemPrompt?: string;
     userPrompt?: string;
 };
@@ -30,6 +32,13 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({data, nodeId, co
         throw new NonRetriableError("Gemini node: Variable name is missing");
     }
 
+    if (!data.credentialId) {
+        await publish(
+            geminiChannel().status({nodeId, status: "error"})
+        );
+        throw new NonRetriableError("Gemini node: Credential is required");
+    }
+
     if (!data.userPrompt) {
         await publish(
             geminiChannel().status({nodeId, status: "error"})
@@ -37,16 +46,22 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({data, nodeId, co
         throw new NonRetriableError("Gemini node: User Prompt is missing");
     }
 
-    // TODO: Throw if credential is missing
-
     const systemPrompt = data.systemPrompt ? Handlebars.compile(data.systemPrompt)(context) : "You are a helpful assistant";
     const userPrompt = Handlebars.compile(data.userPrompt)(context);
 
-    // TODO: Fetch credential that user selected
+    const credential = await step.run("get-credential", () => {
+        return prisma.credential.findUnique({
+            where: {
+                id: data.credentialId
+            }
+        });
+    });
 
-    const credentialValue = process.env.GOOGLE_GENERATIVE_API_KEY!;
+    if (!credential) {
+        throw new NonRetriableError("Gemini node: Credential not found");
+    }
 
-    const google = createGoogleGenerativeAI({apiKey: credentialValue});
+    const google = createGoogleGenerativeAI({apiKey: credential.value});
 
     try {
         const {steps} = await step.ai.wrap(

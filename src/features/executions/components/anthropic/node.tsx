@@ -10,6 +10,7 @@ import { BaseExecutionNode } from "../base-execution-node";
 
 type AnthropicNodeData = {
     variableName?: string;
+    credentialId?: string;
     systemPrompt?: string;
     userPrompt?: string;
 };

@@ -5,6 +5,7 @@ import { NonRetriableError } from "inngest";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { generateText } from "ai";
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 Handlebars.registerHelper("json", (context) => {
     const jsonString = JSON.stringify(context, null, 2);
@@ -65,7 +66,7 @@ export const anthropicExecutor: NodeExecutor<AnthropicData> = async ({data, node
         throw new NonRetriableError("Anthropic node: Credential not found");
     }
 
-    const anthropic = createAnthropic({apiKey: credential.value});
+    const anthropic = createAnthropic({apiKey: decrypt(credential.value)});
 
     try {
         const {steps} = await step.ai.wrap(

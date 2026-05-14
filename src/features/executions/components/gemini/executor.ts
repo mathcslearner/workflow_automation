@@ -5,6 +5,7 @@ import { NonRetriableError } from "inngest";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText } from "ai";
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 Handlebars.registerHelper("json", (context) => {
     const jsonString = JSON.stringify(context, null, 2);
@@ -65,7 +66,7 @@ export const geminiExecutor: NodeExecutor<GeminiData> = async ({data, nodeId, us
         throw new NonRetriableError("Gemini node: Credential not found");
     }
 
-    const google = createGoogleGenerativeAI({apiKey: credential.value});
+    const google = createGoogleGenerativeAI({apiKey: decrypt(credential.value)});
 
     try {
         const {steps} = await step.ai.wrap(
